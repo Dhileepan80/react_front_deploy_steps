@@ -35,6 +35,47 @@ Inside the `<VirtualHost *:80>` block, add the following code to allow configura
 </Directory>
 ```
 
+### Enabling HTTPS with SSL Certificate
+
+If you want to enable HTTPS and have a domain name with an SSL certificate, your Apache configuration file should look like this:
+
+```bash
+# HTTP VirtualHost (Port 80)
+<VirtualHost *:80>
+    ServerName yourdomain.local
+    DocumentRoot /var/www/html
+
+    <Directory /var/www/html>
+        AllowOverride All
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+    # Optional: Redirect all HTTP traffic to HTTPS
+    RewriteEngine On
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R=301,L]
+</VirtualHost>
+
+# HTTPS VirtualHost (Port 443)
+<VirtualHost *:443>
+    ServerName yourdomain.local
+    DocumentRoot /var/www/html
+
+    SSLEngine on
+    SSLCertificateFile /path/to/yourdomain.local.pem
+    SSLCertificateKeyFile /path/to/yourdomain.local-key.pem
+
+    <Directory /var/www/html>
+        AllowOverride All
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+```
+
 ## Step 4: Move Build Folder to Apache Directory
 
 Once the build is complete, navigate to the root directory of your React app. You'll find a `build` folder. Move this folder to the Apache web server directory:
